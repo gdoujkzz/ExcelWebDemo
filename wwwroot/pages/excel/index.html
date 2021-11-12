@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导出Demo</title>
+
+    <script src="../../lib/vue.min.js"></script>
+    <script src="../../lib/axios.min.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../lib/element-ui/theme-defalut/index.css">
+    <!-- 引入组件库 -->
+    <script src="../../lib/element-ui/index.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <el-button @click="exportDataToExcel">导出Excel(XLSX)</el-button>
+        <el-button @click="exportDataToExcelSXLSX">导出Excel(SXLSX)</el-button>
+        <el-button @click="exportDataToExcelSXLSXPage">导出Excel(SXLSX+Page)</el-button>
+        <el-button @click="exportDataToExcelMultiSXLSXPage">导出Excel(SXLSX+Page+多线程)</el-button>
+    </div>
+</body>
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                visible: false,
+                exportUrl: "http://localhost:5000/api/excel/xlsx",
+                exportSXLSXUrl: "http://localhost:5000/api/excel/sxlsx",
+                exportSXLSXPAGEUrl: "http://localhost:5000/api/excel/sxlsxpage",
+                exportSXLSXMULTIPAGEUrl: "http://localhost:5000/api/excel/sxlsxmultipage",
+            }
+        },
+        methods: {
+            exportDataToExcel: function(){
+                var self = this;
+                axios.get(self.exportUrl).then(function (res) {
+                    self.downloadFile(res.data, "测试数据(XLSX方法).xlsx")
+                });
+            },
+            exportDataToExcelSXLSX: function(){
+                var self = this;
+                axios.get(self.exportSXLSXUrl).then(function (res) {
+                    self.downloadFile(res.data, "测试数据(SXLSX方法).xlsx")
+                });
+            },
+            exportDataToExcelSXLSXPage:function(){
+                var self = this;
+                axios.get(self.exportSXLSXPAGEUrl).then(function (res) {
+                    self.downloadFile(res.data, "测试数据(SXLSX方法和分页).xlsx")
+                });
+            },
+            exportDataToExcelMultiSXLSXPage:function(){
+                var self = this;
+                axios.get(self.exportSXLSXMULTIPAGEUrl).then(function (res) {
+                    self.downloadFile(res.data, "测试数据(SXLSX方法和分页以及多线程).xlsx")
+                });
+            },
+            downloadFile: function (file_base64, fileName) {
+                var self=this;
+                var stream = self.base64ToArraryBuffer(file_base64);
+                var buf = [];
+                buf.push(stream);
+                var blob = new Blob(buf, {
+                    type: "text/plain",
+                });
+                var a = document.createElement("a");
+                a.download = fileName;
+                a.href = URL.createObjectURL(blob);
+                a.click();
+            },
+            base64ToArraryBuffer: function (base64) {
+                var binary_string = window.atob(base64);
+                var len = binary_string.length;
+                var bytes = new Uint8Array(len);
+                for (var i = 0; i < len; i++) {
+                    bytes[i] = binary_string.charCodeAt(i);
+                }
+                return bytes.buffer;
+            }
+        }
+    })
+</script>
+
+</html>
